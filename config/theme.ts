@@ -28,8 +28,8 @@ const theme = extendTheme({
   },
   breakpoints,
   config: {
-    useSystemColorMode: false,
-    initialColorMode: 'light',
+    useSystemColorMode: true,
+    initialColorMode: 'dark',
   },
 })
 
