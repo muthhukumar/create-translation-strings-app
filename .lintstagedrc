@@ -1,0 +1,7 @@
+{
+    "*.@(js|ts|tsx)": [
+      "yarn lint",
+      "yarn format",
+      "git add --patch"
+    ]
+  }
