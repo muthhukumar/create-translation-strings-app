@@ -22,24 +22,14 @@ const theme = extendTheme({
       },
     }),
   },
-  colors: {
-    lightWhite: '#fafafa',
-    alert: '#ff007f',
-    violet: '#7a29c9',
-    secondary: '#666666',
-    red: '#ee0202',
-    highlightPink: '#ff0080',
-    violetLight: '#8a63d2',
-    successLight: '#3291ff',
-  },
   fonts: {
     heading: 'Roboto mono',
     body: 'Open Sans',
   },
   breakpoints,
   config: {
-    useSystemColorMode: true,
-    initialColorMode: 'dark',
+    useSystemColorMode: false,
+    initialColorMode: 'light',
   },
 })
 

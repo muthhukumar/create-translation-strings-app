@@ -11,6 +11,7 @@ import SEO from '../next-seo.config'
 import theme from '../config/theme'
 
 import type { AppProps } from 'next/app'
+import { TranslationStringContextProvider } from '../utils/providers/translation'
 
 function MyApp({ Component, pageProps }: AppProps): JSX.Element {
   const router = useRouter()
@@ -25,10 +26,12 @@ function MyApp({ Component, pageProps }: AppProps): JSX.Element {
   }, [router.events])
 
   return (
-    <ChakraProvider resetCSS theme={theme}>
-      <DefaultSeo {...SEO} />
-      <Component {...pageProps} />
-    </ChakraProvider>
+    <TranslationStringContextProvider>
+      <ChakraProvider resetCSS theme={theme}>
+        <DefaultSeo {...SEO} />
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </TranslationStringContextProvider>
   )
 }
 
