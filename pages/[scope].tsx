@@ -31,6 +31,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { HiDownload } from 'react-icons/hi'
+import { NextSeo } from 'next-seo'
 
 import { Page } from '../components'
 import { useTranslationStrings } from '../utils/providers/translation'
@@ -202,7 +203,8 @@ function ScopeTranslationStrings(): JSX.Element | null {
 
   return (
     <Page>
-      <Box flex="1">
+      <NextSeo title={`${scope} | CTS`} />
+      <Box flex="1" pr="4" pb="4">
         <Heading as="h2" fontSize="3xl" mb="8" color="skyblue">
           {scope}
         </Heading>
@@ -316,7 +318,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
               </chakra.form>
             </TabPanel>
             <TabPanel>
-              <Tabs variant="enclosed">
+              <Tabs variant="soft-rounded">
                 <TabList>
                   <Tab>en.json</Tab>
                   <Tab>messages.js</Tab>

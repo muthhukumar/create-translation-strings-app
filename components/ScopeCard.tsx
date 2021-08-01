@@ -61,7 +61,14 @@ function ScopeCard(props: Props): JSX.Element {
   return (
     <Flex borderWidth="1px" borderColor="white.500" p="4" rounded="md" m="2">
       <VStack alignItems="flex-start">
-        <HStack justifyContent="space-between" w="100%" mb="2">
+        <HStack
+          justifyContent="space-between"
+          w="100%"
+          mb="2"
+          borderBottomWidth="1px"
+          borderColor="color.white"
+          pb="4"
+        >
           <Link href={`/${scopeName}`}>
             <a>
               <Text
@@ -92,7 +99,7 @@ function ScopeCard(props: Props): JSX.Element {
           <Text>{fullScopeString}</Text>
         </HStack>
         <Spacer h="30px" />
-        <HStack>
+        <HStack pt="2">
           <Button rightIcon={<HiClipboardList />} w="100%" size="md" onClick={handleCopyToEnJson}>
             en.json
           </Button>
