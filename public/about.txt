@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Festive
+- Font Author: Copyright 2015 The Festive Pro Project Authors (https://github.com/googlefonts/festive)
+- Font Source: http://fonts.gstatic.com/s/festive/v1/cY9Ffj6KX1xcoDWhFtfgy9HTkak.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL)
