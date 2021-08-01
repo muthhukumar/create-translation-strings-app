@@ -1,6 +1,7 @@
+import _ from 'lodash'
 import * as React from 'react'
 
-interface TranslationStringType {
+export interface TranslationStringType {
   scopeName: string
   languages: Array<{ en: Array<{ id: string; defaultValue: string }> }>
 }
@@ -14,6 +15,7 @@ interface TranslationStringContextType {
   }) => void
   addNewScope: (newScope: TranslationStringType) => void
   deleteScope: (scopeName: string) => void
+  deleteTranslationString: (scopeName: string, translationStringId: string) => void
 }
 
 export const TranslationStringContext = React.createContext<TranslationStringContextType>({
@@ -22,6 +24,7 @@ export const TranslationStringContext = React.createContext<TranslationStringCon
   addTranslationStrings: () => undefined,
   addNewScope: () => undefined,
   deleteScope: () => undefined,
+  deleteTranslationString: () => undefined,
 })
 
 export const useTranslationStrings = (): TranslationStringContextType => {
@@ -40,21 +43,9 @@ export function TranslationStringContextProvider({
 }: {
   children: React.ReactNode
 }): JSX.Element {
-  const [translationStrings, setTranslationStrings] = React.useState<Array<TranslationStringType>>([
-    // {
-    //   scopeName: 'testing',
-    //   languages: [
-    //     {
-    //       en: [
-    //         {
-    //           id: 'testing',
-    //           defaultValue: 'testing the defaultValue rendering',
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-  ])
+  const [translationStrings, setTranslationStrings] = React.useState<Array<TranslationStringType>>(
+    [],
+  )
 
   const updateTranslationStrings = React.useCallback((strings) => {
     setTranslationStrings(strings)
@@ -72,7 +63,7 @@ export function TranslationStringContextProvider({
       } = props
 
       setTranslationStrings((state) => {
-        const copiedState = [...state]
+        const copiedState = _.cloneDeep(state)
 
         const currentScopeIndex = state.findIndex((scope) => scope.scopeName === scopeName)
 
@@ -101,6 +92,35 @@ export function TranslationStringContextProvider({
     })
   }, [])
 
+  const deleteTranslationString = React.useCallback((scopeName, translationStringId) => {
+    setTranslationStrings((state) => {
+      const copiedState = _.cloneDeep(state)
+
+      const currentScopeIndex = state.findIndex((scope) => scope.scopeName === scopeName)
+
+      const updatedLanguagesStrings = copiedState[currentScopeIndex].languages.map((language) => {
+        const languageKey = Object.keys(language)[0]
+        if (languageKey === 'en') {
+          return {
+            ['en']: [
+              ...language['en'].filter(
+                (translationString) => translationString.id !== translationStringId,
+              ),
+            ],
+          }
+        }
+        return language
+      })
+
+      copiedState[currentScopeIndex] = {
+        ...copiedState[currentScopeIndex],
+        languages: [...updatedLanguagesStrings],
+      }
+
+      return [...copiedState]
+    })
+  }, [])
+
   const value = React.useMemo(() => {
     return {
       translationStrings,
@@ -108,13 +128,15 @@ export function TranslationStringContextProvider({
       addNewScope,
       addTranslationStrings,
       deleteScope,
+      deleteTranslationString,
     }
   }, [
-    addNewScope,
     translationStrings,
     updateTranslationStrings,
+    addNewScope,
     addTranslationStrings,
     deleteScope,
+    deleteTranslationString,
   ])
 
   return (

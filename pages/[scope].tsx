@@ -4,32 +4,60 @@ import {
   Box,
   Button,
   chakra,
+  Code,
   Divider,
   Heading,
   HStack,
+  IconButton,
   Input,
   InputGroup,
   InputLeftAddon,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  StackDivider,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
+  useDisclosure,
   useToast,
   VStack,
 } from '@chakra-ui/react'
+import { HiDownload } from 'react-icons/hi'
 
 import { Page } from '../components'
 import { useTranslationStrings } from '../utils/providers/translation'
 import { HiClipboardList } from 'react-icons/hi'
+import { MdDeleteForever } from 'react-icons/md'
+import { composeToEnJson, composeToMessages, downloadToFile } from '../utils'
+import { copyToClipboard } from '../utils/index'
 
-function ScopeTranslationStrings(): JSX.Element {
-  const [fullScope, setFullScope] = React.useState<string>('')
-  const [id, setId] = React.useState('')
-  const [defaultValue, setDefaultValue] = React.useState('')
+function ScopeTranslationStrings(): JSX.Element | null {
+  const [fullScope, setFullScope] = React.useState<string>('app.container.HomePage')
+  const [id, setId] = React.useState<string>('')
+  const [defaultValue, setDefaultValue] = React.useState<string>('')
+  const { onClose, onOpen, isOpen } = useDisclosure()
+  const deleteTranslationStringRef = React.useRef('')
 
   const [isIdInvalid, setIsIdInvalid] = React.useState<boolean>(false)
   const [isDefaultValueInvalid, setIsDefaultValueInvalid] = React.useState<boolean>(false)
   const [isFullScopeInvalid, setIsFullScopeInvalid] = React.useState<boolean>(false)
 
   const { scope = '' } = useRouter().query
-  const { translationStrings = [], addTranslationStrings } = useTranslationStrings()
+  const scopeName = typeof scope === 'string' ? scope : ''
+
+  const {
+    translationStrings = [],
+    addTranslationStrings,
+    deleteTranslationString,
+  } = useTranslationStrings()
   const toast = useToast()
   const router = useRouter()
 
@@ -40,6 +68,8 @@ function ScopeTranslationStrings(): JSX.Element {
   )
 
   React.useEffect(() => {
+    // When navigating to different scope some of the state persist for some reason. So when navigating
+    // to new scope this will reset the local state
     setFullScope('')
     setId('')
     setDefaultValue('')
@@ -101,9 +131,7 @@ function ScopeTranslationStrings(): JSX.Element {
     setIsIdInvalid(false)
     setIsDefaultValueInvalid(false)
 
-    const scopeName = typeof scope === 'string' ? scope : ''
-
-    const fullId = fullScope + id
+    const fullId = `${fullScope}.${id}`
 
     const isExistingId = translationStrings.some((translationString) =>
       translationString.languages.some((language) =>
@@ -125,10 +153,54 @@ function ScopeTranslationStrings(): JSX.Element {
     setDefaultValue('')
   }
 
+  const handleDeleteTranslationString = () => {
+    if (!deleteTranslationStringRef.current) {
+      return
+    }
+
+    deleteTranslationString(scopeName, deleteTranslationStringRef.current)
+
+    toast({ title: 'Deleted translationString successfully', status: 'error' })
+
+    deleteTranslationStringRef.current = ''
+
+    onClose()
+  }
+
+  const handleCopyToEnJson = () => {
+    copyToClipboard(composeToEnJson(filteredTranslationStrings[0]), () => {
+      toast({
+        title: 'Copied to en.json format successfully',
+        status: 'success',
+      })
+    })
+  }
+
+  const handleCopyToMessage = () => {
+    copyToClipboard(composeToMessages(fullScope, filteredTranslationStrings[0]), () => {
+      toast({
+        title: 'Copied to messages.js format successfully',
+        status: 'success',
+      })
+    })
+  }
+
+  const handleDownloadToEnJson = () => {
+    const enJsonData = composeToEnJson(filteredTranslationStrings[0])
+
+    downloadToFile(enJsonData, 'en.json')
+  }
+
+  const handleDownloadToMessagesJs = () => {
+    const messagesData = composeToMessages(fullScope, filteredTranslationStrings[0])
+
+    downloadToFile(messagesData, 'messages.js')
+  }
+
   return (
     <Page>
       <Box flex="1">
-        <Heading as="h2" fontSize="4xl" mb="4" color="skyblue">
+        <Heading as="h2" fontSize="3xl" mb="8" color="skyblue">
           {scope}
         </Heading>
         <InputGroup size="md" w="50%" mb="8">
@@ -139,68 +211,148 @@ function ScopeTranslationStrings(): JSX.Element {
             placeholder="scope..."
             value={fullScope}
             onChange={handleFullScopeOnChange}
+            defaultValue={'app.container.HomePage'}
             isInvalid={isFullScopeInvalid}
           />
         </InputGroup>
-        <Text mb="2" fontSize="lg">
-          Copy to clipboard
-        </Text>
-        <HStack>
-          <Button rightIcon={<HiClipboardList />}>en.json</Button>
-          <Button rightIcon={<HiClipboardList />}>messages.js</Button>
-        </HStack>
-        <Divider mt="8" />
-        <VStack mt="8" alignItems="flex-start">
-          <Text fontSize="xl" textDecoration="underline">
-            Translation strings
-          </Text>
-          {filteredTranslationStrings.map((translationString) => {
-            return translationString.languages.map((language) => {
-              const languageStrings = language['en']
-              return (
-                <>
-                  <Text fontSize="lg">en {`{`}</Text>
-                  <VStack key="en" alignItems="flex-start" pl="4">
-                    {languageStrings.map((languageString) => (
-                      <Text key={languageString?.id}>
-                        {`"${languageString?.id}" : "${languageString?.defaultValue}"`}
-                      </Text>
-                    ))}
-                  </VStack>
-                  <Text fontSize="lg">{`}`}</Text>
-                </>
-              )
-            })
-          })}
-        </VStack>
-        <chakra.form mt="4" maxW="container.lg" onSubmit={handleAddNewTranslationString}>
-          <HStack>
-            <Text fontSize="lg" fontWeight="bold" mb="2" textDecoration="underline">
-              {fullScope}
+        <HStack alignItems="flex-start" divider={<StackDivider borderColor="white.500" />}>
+          <Box>
+            <Text mb="2" fontSize="lg">
+              Copy to clipboard
             </Text>
-            <Input
-              placeholder="id..."
-              maxW="25%"
-              type="text"
-              errorBorderColor="crimson"
-              isInvalid={isIdInvalid}
-              value={id}
-              onChange={handleIdOnChange}
-            />
-            <Input
-              placeholder="default value..."
-              type="text"
-              errorBorderColor="crimson"
-              isInvalid={isDefaultValueInvalid}
-              value={defaultValue}
-              onChange={handleDefaultValueOnChange}
-            />
-            <Button size="md" type="submit">
-              Add
-            </Button>
-          </HStack>
-        </chakra.form>
+            <HStack>
+              <Button rightIcon={<HiClipboardList />} onClick={handleCopyToEnJson}>
+                en.json
+              </Button>
+              <Button rightIcon={<HiClipboardList />} onClick={handleCopyToMessage}>
+                messages.js
+              </Button>
+            </HStack>
+          </Box>
+          <Box ml="2">
+            <Text mb="2" fontSize="lg">
+              Download to file
+            </Text>
+            <HStack>
+              <Button rightIcon={<HiDownload />} onClick={handleDownloadToEnJson}>
+                en.json
+              </Button>
+              <Button rightIcon={<HiDownload />} onClick={handleDownloadToMessagesJs}>
+                messages.js
+              </Button>
+            </HStack>
+          </Box>
+        </HStack>
+
+        <Divider mt="8" />
+        <Tabs mt="4" isLazy>
+          <TabList>
+            <Tab>Add translate strings</Tab>
+            <Tab>Output</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <VStack mt="8" alignItems="flex-start">
+                <Text fontSize="xl" textDecoration="underline">
+                  Translation strings
+                </Text>
+                {filteredTranslationStrings.map((translationString) => {
+                  return translationString.languages.map((language) => {
+                    const languageStrings = language['en']
+                    return (
+                      <>
+                        <Text fontSize="lg">en {`{`}</Text>
+                        <VStack key="en" alignItems="flex-start" pl="4">
+                          {languageStrings.map((languageString) => (
+                            <HStack key={languageString?.id}>
+                              <Text>{`"${languageString?.id}" : "${languageString?.defaultValue}"`}</Text>
+                              <IconButton
+                                aria-label="Delete the scope"
+                                size="xs"
+                                icon={<MdDeleteForever size="20" />}
+                                marginLeft="auto"
+                                onClick={() => {
+                                  onOpen()
+                                  deleteTranslationStringRef.current = languageString?.id
+                                }}
+                              />
+                            </HStack>
+                          ))}
+                        </VStack>
+                        <Text fontSize="lg">{`}`}</Text>
+                      </>
+                    )
+                  })
+                })}
+              </VStack>
+              <chakra.form mt="4" maxW="container.lg" onSubmit={handleAddNewTranslationString}>
+                <HStack>
+                  <Text fontSize="lg" fontWeight="bold" mb="2" textDecoration="underline">
+                    {fullScope}
+                  </Text>
+                  <Input
+                    placeholder="id..."
+                    maxW="25%"
+                    type="text"
+                    errorBorderColor="crimson"
+                    isInvalid={isIdInvalid}
+                    value={id}
+                    onChange={handleIdOnChange}
+                  />
+                  <Input
+                    placeholder="default value..."
+                    type="text"
+                    errorBorderColor="crimson"
+                    isInvalid={isDefaultValueInvalid}
+                    value={defaultValue}
+                    onChange={handleDefaultValueOnChange}
+                  />
+                  <Button size="md" type="submit">
+                    Add
+                  </Button>
+                </HStack>
+              </chakra.form>
+            </TabPanel>
+            <TabPanel>
+              <Tabs variant="enclosed">
+                <TabList>
+                  <Tab>en.json</Tab>
+                  <Tab>messages.js</Tab>
+                </TabList>
+
+                <TabPanels>
+                  <TabPanel>
+                    <Code w="100%">
+                      <pre>{composeToEnJson(filteredTranslationStrings[0])}</pre>
+                    </Code>
+                  </TabPanel>
+                  <TabPanel>
+                    <Code w="100%">
+                      <pre>{composeToMessages(fullScope, filteredTranslationStrings[0])}</pre>
+                    </Code>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete Scope</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure to delete this string?</ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={handleDeleteTranslationString}>
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Page>
   )
 }

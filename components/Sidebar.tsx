@@ -114,7 +114,6 @@ function SideBar(): JSX.Element {
                   onOpen()
                   deleteScopeRef.current = translationString.scopeName
                 }}
-                // onClick={deleteScope.bind(null, translationString.scopeName)}
               />
             </HStack>
           ))
@@ -133,7 +132,7 @@ function SideBar(): JSX.Element {
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
+              Cancel
             </Button>
             <Button colorScheme="red" onClick={handleDeleteScope}>
               Delete
