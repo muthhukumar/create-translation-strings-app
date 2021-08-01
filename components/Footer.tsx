@@ -46,7 +46,7 @@ function Footer(): JSX.Element {
               <Divider orientation="vertical" h="50%" />
               <IconButton
                 variant="outline"
-                aria-label="open twitter"
+                aria-label="open github"
                 icon={<GoMarkGithub />}
                 border="none"
                 size="sm"
