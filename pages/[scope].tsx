@@ -208,7 +208,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
         <Heading as="h2" fontSize="3xl" mb="8" color="skyblue">
           {scope}
         </Heading>
-        <InputGroup size="md" w="40%" mb="8">
+        <InputGroup size="md" w="100%" maxW="container.md" mb="8">
           <InputLeftAddon>Full scope string</InputLeftAddon>
           <Input
             errorBorderColor="crimson"
