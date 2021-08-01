@@ -7,7 +7,7 @@ export function useLocalStorageState<StateType>(
 ): [StateType, React.Dispatch<React.SetStateAction<StateType>>] {
   const [state, setState] = React.useState<StateType>(() => defaultValue)
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     // This will make sure that this useEffect only happens at browser side not in the client side.
     const getDefaultValue = () => {
       const valueInLocalStorage = window.localStorage.getItem(key)
