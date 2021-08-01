@@ -40,7 +40,6 @@ import { composeToEnJson, composeToMessages, downloadToFile } from '../utils'
 import { copyToClipboard } from '../utils/index'
 
 function ScopeTranslationStrings(): JSX.Element | null {
-  const [fullScope, setFullScope] = React.useState<string>('app.container.HomePage')
   const [id, setId] = React.useState<string>('')
   const [defaultValue, setDefaultValue] = React.useState<string>('')
   const { onClose, onOpen, isOpen } = useDisclosure()
@@ -57,6 +56,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
     translationStrings = [],
     addTranslationStrings,
     deleteTranslationString,
+    setFullScopeString,
   } = useTranslationStrings()
   const toast = useToast()
   const router = useRouter()
@@ -67,10 +67,11 @@ function ScopeTranslationStrings(): JSX.Element | null {
     [scope, translationStrings],
   )
 
+  const fullScope = filteredTranslationStrings[0]?.fullScopeString ?? ''
+
   React.useEffect(() => {
     // When navigating to different scope some of the state persist for some reason. So when navigating
     // to new scope this will reset the local state
-    setFullScope('')
     setId('')
     setDefaultValue('')
   }, [scope])
@@ -107,7 +108,9 @@ function ScopeTranslationStrings(): JSX.Element | null {
       setIsFullScopeInvalid(false)
     }
 
-    setFullScope(currentFullScope)
+    if (typeof scope === 'string') {
+      setFullScopeString(scope, currentFullScope)
+    }
   }
 
   const handleAddNewTranslationString = (e: React.SyntheticEvent) => {
@@ -160,7 +163,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
 
     deleteTranslationString(scopeName, deleteTranslationStringRef.current)
 
-    toast({ title: 'Deleted translationString successfully', status: 'error' })
+    toast({ title: 'Deleted translationString successfully', status: 'success' })
 
     deleteTranslationStringRef.current = ''
 
@@ -203,7 +206,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
         <Heading as="h2" fontSize="3xl" mb="8" color="skyblue">
           {scope}
         </Heading>
-        <InputGroup size="md" w="50%" mb="8">
+        <InputGroup size="md" w="40%" mb="8">
           <InputLeftAddon>Full scope string</InputLeftAddon>
           <Input
             errorBorderColor="crimson"
@@ -211,7 +214,6 @@ function ScopeTranslationStrings(): JSX.Element | null {
             placeholder="scope..."
             value={fullScope}
             onChange={handleFullScopeOnChange}
-            defaultValue={'app.container.HomePage'}
             isInvalid={isFullScopeInvalid}
           />
         </InputGroup>
@@ -252,7 +254,7 @@ function ScopeTranslationStrings(): JSX.Element | null {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <VStack mt="8" alignItems="flex-start">
+              <VStack alignItems="flex-start">
                 <Text fontSize="xl" textDecoration="underline">
                   Translation strings
                 </Text>

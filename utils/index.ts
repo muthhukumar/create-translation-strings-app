@@ -3,6 +3,7 @@ import type { TranslationStringType } from './providers/translation'
 export const composeToEnJson = (
   translationStrings: TranslationStringType = {
     scopeName: '',
+    fullScopeString: '',
     languages: [{ en: [] }],
   },
 ): string => {
@@ -37,6 +38,7 @@ export const composeToMessages = (
   scopeName: string,
   translationStrings: TranslationStringType = {
     scopeName: '',
+    fullScopeString: '',
     languages: [{ en: [] }],
   },
 ): string => {
